@@ -1,0 +1,760 @@
+1.
+declare
+e_name emp.ename%type;
+join_date emp.hiredate%type;
+designation emp.job%type;
+e_num emp.empno%type:=:employee_number;
+
+begin
+select ename,hiredate,job into e_name,join_date,designation from emp where empno=e_num;
+dbms_output.put_line('Employee Number: '||e_num);
+dbms_output.put_line('Employee Name: '||e_name);
+dbms_output.put_line('Employee Joining Date: '||join_date);
+dbms_output.put_line('Employee Job: '||designation);
+
+end
+
+2.
+declare
+sum_sal emp.sal%type;
+num_of_employee number;
+dept_number emp.deptno%type:=:department_number;
+
+begin
+select sum(sal),count(*) into sum_sal,num_of_employee from emp,dept where emp.deptno=dept.deptno group by dept_number;
+
+dbms_output.put_line('Department Number: '||dept_number);
+dbms_output.put_line('Number of Employee: '||num_of_employee);
+dbms_output.put_line('Sum of salary: '||sum_sal);
+
+end
+
+3.
+declare
+circle_area number;
+circle_radius number:=8;
+pii number:=3.1415;
+
+begin
+
+dbms_output.put_line('Area of Circle: '||(pii*(circle_radius*circle_radius)) );
+
+end
+
+4.
+declare
+e_name emp.ename%type(50);
+commission emp.comm%type:=1200;
+new_commission emp.comm%type;
+e_num emp.empno%type;
+
+
+begin
+select e.empno into e_num from emp e,emp m where e.empno=m.mgr and e.sal=(select min(e.sal) from emp e,emp m where e.empno=m.mgr);
+update emp set comm=commission where empno=e_num;
+select e.empno,e.ename,e.comm into e_num,e_name,new_commission from emp e,emp m where e.empno=m.mgr and e.sal=(select min(e.sal) from emp e,emp m where e.empno=m.mgr);
+dbms_output.put_line('Employee Number: '||e_num);
+dbms_output.put_line('Employee Name: '||e_name);
+dbms_output.put_line('New Commission: '||new_commission);
+
+
+end
+
+5.	Insert a new department HR in the location of Texas where the department no will be the current maximum department no+10.
+declare
+current_dept dept.deptno%type;
+new_dept dept.deptno%type;
+location dept.loc%type) :='Texas';
+dept_name varchar(50) :='HR';
+
+begin
+select (deptno+10) into new_dept from dept where deptno=(select max(deptno) from dept);
+insert into dept values (new_dept,dept_name,location);
+select dname,loc into dept_name,location from dept where deptno=new_dept;
+
+dbms_output.put_line('Department Number: '||new_dept);
+dbms_output.put_line('Department Name: '||dept_name);
+dbms_output.put_line('Location: '||location);
+
+end
+
+
+6.	Create a program which will take the empno of an employee and will return the updated salay after increament. The increament will take place based on the experience.  
+declare
+experience number;
+e_num number:=:employee_number;
+new_sal number;
+
+begin
+select (months_between(sysdate-hiredate))*12 into experience from emp where empno=e_num;
+
+if(experience > 7) then
+update emp set sal=(sal+((5*sal)/100)) where empno=e_num;
+elsif(experience > 5 and experience < 7) then
+update emp set sal=(sal+((7*sal)/100)) where empno=e_num;
+elsif(experience > 3 and experience < 5) then
+update emp set sal=(sal+((10*sal)/100)) where empno=e_num;
+elsif(experience < 3) then
+update emp set sal=(sal+((12*sal)/100)) where empno=e_num;
+end if;
+
+select sal into new_sal from emp where empno=e_num;
+
+dbms_output.put_line('Emp Number: '||e_num);
+dbms_output.put_line('New Sal: '||new_sal);
+
+end
+
+
+
+
+1--
+declare
+
+num number(5):=:Enter_a_limit;
+rem number(5):=0;
+
+begin
+while num>0
+loop
+rem:=mod(num,2);
+if(rem=0) then
+dbms_output.put_line(num);
+num:=num-1;
+end if;
+end loop;
+end;
+
+2--
+declare
+a number:=:Enter_a_number;
+i number:=1;
+j number:=1;
+x number:=1;
+Begin
+
+for j in 1..a loop
+x:=1;
+for i in 1..j loop
+end loop;
+x:=x*i;
+dbms_output.put_line(x);
+
+end loop;
+
+end;
+
+
+3-----
+declare
+a number(5):=:Enter_a_NUMBER;
+b number(5):=0;
+i number(5):=0;
+begin
+for i in 2..a/2
+loop
+if mod(a,i)=0 then
+b:=1;
+end if;
+end loop;
+
+
+if b=0 then
+dbms_output.put_line('prime');
+elsif b<>0 then
+dbms_output.put_line('not prime');
+end if;
+
+end;
+
+
+
+
+
+a)	Write a PLSQL program to take the  customer_ID as an input. Display the list of unique product_IDs that customer purchased from the sales table.
+
+declare
+customer sales.customer_id%type:=:Customer_ID;
+product sales.product_id%type;
+cursor product_list is select product_id as product from sales where customer_id=customer;
+begin
+for i in product_list loop
+dbms_output.put_line(i.product);
+end loop;
+end;
+
+b)	Write a PLSQL program to take the customer_ID as an input. Display the total amount of that customer  purchases.
+declare
+customer sales.customer_id%type:=:Customer_ID;
+qnty sales.quantity%type;
+cursor product_list is select sum(quantity) as qnty from sales where customer_id=customer;
+
+begin
+for i in product_list loop
+dbms_output.put_line('Total Amount Customer '||customer||' purchased: '||i.qnty);
+end loop;
+end;
+
+c)	Using cursors write a PLSQL program to print out on screen the product_ID and price for each product within the products table (ascending by product_ID).
+
+declare
+cursor product_list is select product_id,price from product order by product_id;
+
+begin
+for i in product_list loop
+dbms_output.put_line('Product ID:'||i.product_id||' and Price: '||i.price);
+end loop;
+end;
+
+
+
+--lab exam
+
+1.	Write a PL/SQL program to count number of employees in a specific department and check whether this department have any vacancies or not. If any vacancies, how many vacancies are in that department. We assume that department can have maximum 10 employees.
+
+declare
+emp_count number;
+rem_count number;
+dept_num emp.deptno%type:=:Enter_Department_number;
+
+cursor c1 is select count(*) as emp_count from emp where deptno=dept_num group by deptno; 
+
+begin
+for i in c1 loop
+if(i.emp_count>10) then
+dbms_output.put_line('No Vacancy in Department '||dept_num);
+elsif(i.emp_count<10)then
+rem_count:= 10-i.emp_count;
+dbms_output.put_line('Number of Vacancy in Department '||dept_num||' is '||rem_count);
+end if;
+end loop;
+end;
+
+
+
+2.	Write a PL/SQL script that uses cursor For Loop to calculate bonus for employees as 5%of salary + 2.5% of comm. The calculated bonus is store in a table bonuses(empno, bonus).
+
+declare
+emp_bonus number;
+emp_num emp.empno%type;
+cursor c1 is select empno as emp_num,((5*sal)/100)+((nvl(comm,0)*2.5)/100) as emp_bonus from emp; 
+
+begin
+for i in c1 loop
+insert into bonuses values (i.emp_num,i.emp_bonus);
+dbms_output.put_line('Employee Number: '||i.emp_num||' & Bonus: '||i.emp_bonus);
+
+end loop;
+end;
+
+
+
+3.	Write a program in PL/SQL to print the prime numbers between 1 to 50.
+declare
+    counter number;
+    x number;
+begin
+dbms_output.put_line('Prime Numbers between 1 to 50 are: ');  
+for y in 1..50 loop   
+    counter := 0;
+    x := floor(y/2);
+    for z in 2..x loop
+        if (mod(y, z) = 0 ) then
+            counter := 1;
+        end if;
+    end loop;
+    if (counter = 0) then
+       dbms_output.put_line(y);
+    end if;
+  end loop;
+end;
+
+
+4.	Write a c program to find the perfect numbers within a given number of ranges.
+
+declare
+ range number(5):=:Enter_range;
+ i number (5);
+ d number (5);
+ s number (5);
+ 
+begin
+dbms_output.put_line('Perfect Numbers are: ');
+for i in 2..range loop
+ d:=2;
+ s:=1;
+  while(d*2<=i) loop
+    if (mod (i,d)=0) then
+      s:=s+d;
+    end if;
+ d:=d+1;
+  end loop;
+
+  if (s=i) then 
+    dbms_output.put_line(i);
+  end if;
+end loop;
+end;
+
+
+5.	Find the largest number from three numbers.
+
+declare
+a number:=:First_Number;
+b number:=:Second_Number;
+c number:=:Third_Number;
+begin
+dbms_output.put_line('First Number is : '||a);
+dbms_output.put_line('Second Number is : '||b);
+dbms_output.put_line('Third Number is : '||c);
+
+if (a>b) and (a>c)
+then
+    dbms_output.put_line('Largest Number is: '||a);
+elsif (b>a) and (b>c)
+then
+    dbms_output.put_line('Largest Number is: '||b);
+else
+    dbms_output.put_line('Largest Number is: '||c);
+end if;
+end;
+
+//-- procedure
+
+ 1. Create a procedure which will take department number as an input and show the department name,loc and no. of employees working on it.
+
+create or replace procedure p1(d_no in dept.deptno%type, d_name out dept.dname%type, d_loc out dept.loc%type, emp_count out number)
+as begin select d.dname, d.loc, count(*) into d_name,d_loc,emp_count from emp e,dept d where e.deptno = d.deptno and d.deptno=d_no group by d.dname,d.loc;
+end; 
+
+declare
+d_no dept.deptno%type:=:d_no;
+d_name dept.dname%type;
+d_loc dept.loc%type;
+emp_count number;
+
+
+begin
+p1(d_no,d_name,d_loc,emp_count);
+dbms_output.put_line('Dept No:'||d_no||' Dept Name:'||d_name||' Dept Loc:'||d_loc||' Total Emp:'||emp_count);
+end;
+
+
+ 2.  Create procedure which gets the name of all the employees and find out every one's job and bind it to an out parameter. (Use cursor for loop)
+create or replace procedure p2(eno in emp.empno%type, e_name out emp.ename%type, ejob out emp.job%type) is begin
+select ename,sal into e_name,ejob from emp where empno=eno;
+end;
+
+declare
+eno emp.empno%type;
+e_name emp.ename%type;
+ejob emp.job%type;
+cursor c1 is select empno from emp; 
+
+begin
+for i in c1 loop
+p2(i.empno, e_name,ejob);
+dbms_output.put_line('EMP No: '||i.empno||' Emp Name:'||e_name||' Emp Job:'||ejob);
+end loop;
+end;
+
+3. Create a procedure which will receive all the  deptno one by one each time when the procedure will be called and find out total salary of the employees belong from that department and bind it to an out parameter. (Use cursor for loop) 
+
+create or replace procedure c3(d_no in dept.deptno%type, total_sal out emp.sal%type) is begin
+select sum(emp.sal) into total_sal from emp,dept where emp.deptno=dept.deptno and dept.deptno=d_no;
+end;
+
+declare
+total_sal emp.sal%type;
+cursor c1
+is
+select deptno from dept;
+
+begin
+for i in c1 loop
+c3(i.deptno, total_sal);
+dbms_output.put_line('Dept No: '||i.deptno||' Total Sal:'||total_sal);
+end loop;
+end;
+
+
+4.
+create or replace function f1(eno emp.empno%type) return boolean
+is
+cursor c2 is select empno from emp;
+i number(5);
+begin
+for i in c2 loop
+if(i.empno<>eno) then
+return true;
+end if;
+end loop;
+end; 
+
+create or replace procedure new_emp(eno emp.empno%type)
+is 
+begin
+if(f1(eno)=true) then
+insert into emp(empno,ename,job,hiredate,sal,deptno) values(eno,'JOHN','PRESIDENT','12-FEB-80',9000,10);
+else
+dbms_output.put_line('Not valid!!!');
+end if;
+end;
+
+declare
+e_no emp.empno%type:=:n_emp;
+
+begin 
+new_emp(e_no);
+end;
+
+
+===============================
+create or replace function CheckValidStudent(psnum sstudent.snum%type) return boolean is
+cursor c1 is select snum from sstudent;
+
+begin
+for i in c1 loop
+if(i.snum = psnum) then
+return true;
+end if;
+end loop;
+end;
+
+=====================================================================
+
+create or replace function CheckValidCourse(pcnum in course.cnum%type) return boolean is
+cursor c2 is select cnum from course;
+
+begin
+for i in c2 loop
+if(i.cnum = pcnum) then
+return true;
+end if;
+end loop;
+end;
+
+=====================================================================
+
+create or replace function CheckStanding(psnum sstudent.snum%type,pcnum in course.cnum%type) return boolean is
+course_stnd course.standing%type;
+student_stnd sstudent.standing%type;
+begin
+select standing into course_stnd from course where cnum=pcnum;
+select standing into student_stnd from sstudent where snum=psnum;
+if(course_stnd = student_stnd) then
+return true;
+end if;
+end;
+
+======================================================================
+
+
+create or replace function CheckClassCapacity(pcnum course.cnum%type) return boolean is
+cursor c4 is select cnum from enroll where cnum=pcnum;
+counter number:=0;
+c_capacity course.capacity%type;
+begin
+select capacity into c_capacity from course where cnum=pcnum;
+for i in c4 loop
+counter:=counter+1;
+end loop;
+
+if(counter < c_capacity) then
+return true;
+end if;
+
+end;
+
+
+========================================================================
+
+create or replace procedure AddCourse(psnum in sstudent.snum%type, pcnum in course.cnum%type)
+is
+begin
+if(CheckValidStudent(psnum)=true) then
+
+if(CheckValidCourse(pcnum) =true) then
+
+if(CheckStanding(psnum,pcnum)=true) then
+
+if(CheckClassCapacity(pcnum)=true) then
+
+insert into enroll values(5,psnum,pcnum,'3.00');
+
+dbms_output.put_line('Student Enrolled in Course');
+
+elsif(CheckClassCapacity(pcnum)=false) then
+dbms_output.put_line('Course do not have enough room for adding Student');
+
+end if;
+
+elsif(CheckStanding(psnum,pcnum)=false) then
+dbms_output.put_line('Student Standing not fullfilled with Course Standing');
+
+end if;
+
+elsif(CheckValidCourse(pcnum)=false) then
+dbms_output.put_line('Course is not Valid');
+
+end if;
+
+elsif(CheckValidStudent(psnum)=false) then
+dbms_output.put_line('Student is not a valid Student');
+
+end if;
+end;
+
+==========================================================
+
+declare
+psnum sstudent.snum%type:=:student_id;
+pcnum course.cnum%type:=:course_id;
+begin
+AddCourse(psnum,pcnum);
+end;
+
+
+
+
+===========================
+
+drop trigger sal_trigger 
+
+1.Suppose XYZ company has a rule stating that a employee’s salary cannot be changed by more than 20% of the original salary if his/her experience is less than 5 years. Create a trigger ‘salary_change_monitoring’ to enforce this constraint. The trigger fires whenever there is an update to the emp table and outputs a suitable error message when the rule is violated.
+
+create or replace trigger salary_change_monitoring
+before update of sal on emp 
+for each row
+begin
+if(((sysdate-:old.hiredate)/365)<5)then
+raise_application_error(-20202,'Experience is less than 5 years');
+
+elsif(:new.sal>(:old.sal+(:old.sal*20)/100)) then
+raise_application_error(-20201,'Cannot increase more than 20% of old salary');
+end if;
+end; 
+
+select * from emp
+update emp set sal=3000 where empno=7369
+
+
+2. Write database triggers that checks that qty_on_hnd does not become negative.
+
+create table product_master
+(
+	pno varchar2(5),
+	description varchar2(10),
+	profit_percent number(3),
+	unit_measure varchar2(10),
+	qoh number(4),
+	reorderlevel number(8),
+	sell_price number(8),
+	cose_price number(8)
+);
+
+drop trigger qnt_trigger
+
+create or replace trigger qnt_trigger
+before insert or update of qoh on product_master
+for each row
+begin
+if(inserting)then
+if(:old.qoh<0) then
+raise_application_error(-20202,'Quantity Cannot be negetive');
+end if;
+
+elsif(updating) then
+if(:new.qoh<0) then
+raise_application_error(-20201,'Cannot increase more than 20% of old salary');
+end if;
+
+end if;
+end; 
+
+
+3.	A trigger occurs when ever an insert or update occurs in bookself table and insert the old and new data in the bookself_audit table.
+
+
+create table bookself
+(
+	Title varchar2(6),
+	publisher varchar2(6),
+	rating varchar2(5)
+);
+create table bookself_audit
+(
+	Title varchar2(6),
+	publisher varchar2(6),
+	old_rating varchar2(5),
+	new_rating varchar2(5),
+	audit_dt date
+)
+
+
+create or replace trigger book_trigger
+after insert or update of rating on bookself 
+for each row
+begin
+if(inserting)then
+insert into bookself_audit values(:new.title,:new.publisher,:new.rating,:new.rating,sysdate);
+
+elsif(updating) then
+insert into bookself_audit values(:old.title,:old.publisher,:old.rating,:new.rating,sysdate);
+
+end if;
+end;
+
+
+4.	Create 2 tables, LAB7_RESERVATIONS table with 2 columns
+
+Create table LAB7_RESERVATIONS
+( 	flight_id char(6) not null,
+ 	Customer_phone char(11) not null )
+
+ Create table LAB7_flights
+( 	flight_id char(6) not null,
+ 	Seats  number(3) not null,
+Primary key (flight_id) )
+
+Insert into LAB7_flights values (ACO529,120)
+Insert into LAB7_flights values (ACO529,120)
+
+ 	Create a trigger LAB7_RES_TRG that will ensure that when a new row is inserted into the 
+LAB7_RESERVATIONS table, the flight id is in the LAB7_FLIGHTS table and that the number 
+of seats on this flight, SEATS is greater than 0. Here are the details of how the trigger should 
+behave: 
+*	If flight id is not in the flights table it should raise application error ‘Invalid flight id’
+*	If flight id is in the flights table, (for example AC0529) but SEATS = 0, then it should raise application error ‘Flight AC0529 has no seats left’
+*	If flight id is in the flights table and SEATS > 0,then it should update the appropriate row in flights table by setting SEATS = SEATS – 1 for this flight. 
+
+
+Lab final quiz
+
+1.
+--Package Specification
+create or replace package emp_package as
+procedure emp_procedure(catch_eno emp.empno%type);
+procedure dept_procedure(dept_no emp.deptno%type);
+end emp_package;
+
+
+--Package Body
+create or replace package body emp_package as
+    procedure emp_procedure(catch_eno emp.empno%type ) is
+      
+      emp_no emp.empno%type;
+      emp_name emp.ename%type;
+      emp_hiredate emp.hiredate%type;
+      emp_job emp.job%type;
+      invalid_eno exception;
+      found_counter boolean:=false;
+      i number(5);
+
+   cursor c1 is
+    select empno from emp;
+ begin
+     for i in c1 loop
+       if(i.empno= catch_eno) then
+         select empno,ename,hiredate,job into emp_no ,emp_name ,emp_hiredate,emp_job from emp where empno=catch_eno ;
+         dbms_output.put_line('Employee_Number:'||emp_no);
+         dbms_output.put_line('Employee_Name:'||emp_name);
+         dbms_output.put_line('Hire_Date:'||emp_hiredate);
+         dbms_output.put_line('JOB:'||emp_job);
+         found_counter:=true;
+        
+        end if;
+     end loop;
+
+     if(found_counter=false) then
+        raise invalid_eno;
+     end if;
+
+exception
+    when invalid_eno then
+      dbms_output.put_line('Wrong Employee Number');
+end;
+
+
+function total_sal(dept_no emp.deptno%type) return number
+   is
+      check_sal number(10);
+     i number(2);
+     cursor c2 is 
+      select deptno from emp;
+  
+ begin
+    for i in c2 loop
+     if (i.deptno=dept_no) then
+      select sum(sal) into check_sal from emp where deptno=dept_no group by deptno;
+      return check_sal;
+     else
+     return -1;
+     end if;
+    end loop;
+ end;
+
+
+procedure dept_procedure(dept_no emp.deptno%type) is
+    sum_of_sal number:=total_sal(dept_no);
+  begin
+   if (sum_of_sal=-1) then
+     dbms_output.put_line('Invalid Department Number');
+   else
+  dbms_output.put_line('Department Number '||dept_no||' get total salary: '||sum_of_sal);
+  end if;
+end;
+end emp_package;
+
+
+--Calling PLSQL Code
+declare
+  emp_num emp.empno%type:=:employee_number;
+  dept_num emp.deptno%type:=:department_number;
+begin
+  emp_package.emp_procedure(emp_num);
+  emp_package.dept_procedure(dept_num);
+end;
+
+
+----------------------------------------------------------
+
+
+2.
+create or replace procedure display_procedure(emp_number in emp.empno%type, emp_name out emp.ename%type, emp_salary out emp.sal%type)
+   is 
+   Begin
+   select ename,sal into emp_name ,emp_salary from emp where empno = emp_number and rownum < 5 order by sal desc;
+   End;
+
+ Declare
+   emp_name emp.ename%type;
+   emp_no emp.empno%type;
+   emp_salary emp.sal%type;
+   i number(5);
+  cursor c1
+   is
+   select empno from emp where rownum < 5 order by sal desc;
+  Begin
+   for i in c1 loop
+   display_procedure(i.empno,emp_name,emp_salary);
+   dbms_output.put_line('Employee Number : '||i.empno);
+   dbms_output.put_line('Employee Name : '|| emp_name);
+   dbms_output.put_line('Employee Job : '||emp_salary);
+   end loop;
+ End;
+
+-----------------------------------------------------------------------------
+
+
+3.
+Create or replace trigger salary_change_monitoring
+before update of sal on emp
+for each row
+
+begin
+if(:new.sal > (:old.sal+ (:old.sal*(20/100)))) then
+raise_application_error(-20111,'New salary is more than 20% of old salary');
+end if;
+end;
+
